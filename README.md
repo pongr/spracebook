@@ -3,7 +3,7 @@ Spracebook is a native Scala SDK that provides asynchronous access to the [Faceb
 ### sbt
 
 ```
-"com.pongr" %% "diamondhead" % "0.9.0-SNAPSHOT"
+"com.pongr" %% "spracebook" % "0.1.0-SNAPSHOT"
 ```
 
 ### Usage
