@@ -42,7 +42,7 @@ Spracebook is released under the [Apache 2 License][5].
 ### Authors
 
 * [Zach Cox][6]
-* [Byamba Tumurkhuu<][7]
+* [Byamba Tumurkhuu][7]
 * [Bayarmunkh Davaadorj][8]
 
 [1]: https://developers.facebook.com/docs/reference/api/
