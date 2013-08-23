@@ -2,6 +2,8 @@ Spracebook is a native Scala SDK that provides asynchronous access to the [Faceb
 
 ### sbt
 
+Spracebook releases are in the central Maven repository. Snapshots are in [https://oss.sonatype.org/content/repositories/snapshots/][4].
+
 ```
 "com.pongr" %% "spracebook" % "0.1.0-SNAPSHOT"
 ```
@@ -31,3 +33,4 @@ val event: Future[CreatedComment] = facebook.createComment(photoId, "That is tot
 [1]: https://developers.facebook.com/docs/reference/api/
 [2]: http://spray.io/documentation/1.0-M8.1/spray-client/
 [3]: https://github.com/spray/spray-json
+[4]: https://oss.sonatype.org/content/repositories/snapshots/
