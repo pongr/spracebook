@@ -55,15 +55,17 @@ pomExtra := (
     <developer>
       <id>zcox</id>
       <name>Zach Cox</name>
-      <url>http://theza.ch</url>
+      <url>https://github.com/zcox</url>
     </developer>
     <developer>
       <id>pcetsogtoo</id>
       <name>Byamba Tumurkhuu</name>
+      <url>https://github.com/pcetsogtoo</url>
     </developer>
     <developer>
       <id>bayarmunkh</id>
       <name>Bayarmunkh Davaadorj</name>
+      <url>https://github.com/bayarmunkh</url>
     </developer>
   </developers>
 )
