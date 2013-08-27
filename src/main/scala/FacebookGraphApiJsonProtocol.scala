@@ -16,18 +16,19 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
 
   case class TokenDataWrapper(data: TokenData)
 
-  case class TokenExtension(
+  case class AccessToken(
     access_token: String, 
     expires: Long
   )
 
-  object TokenExtension {
-    //for unmarshalling response from Graph API: String => TokenExtension
+  object AccessToken {
+    //for unmarshalling response from Graph API: String => AccessToken
     import spray.httpx.unmarshalling.Unmarshaller
     import spray.http.MediaTypes._
-    implicit val TokenExtensionUnmarshaller = Unmarshaller.delegate[String, TokenExtension](`text/plain`) { string => 
-      val map = string.split('&').map(_.split('=')).map(a => (a(0), a(1))).toMap //TODO url-decode
-      TokenExtension(map("access_token"), map("expires").toLong)
+    def decode(s: String): String = java.net.URLDecoder.decode(s, "UTF-8")
+    implicit val AccessTokenUnmarshaller = Unmarshaller.delegate[String, AccessToken](`text/plain`) { string => 
+      val map = string.split('&').map(_.split('=')).map(a => (a(0), decode(a(1)))).toMap
+      AccessToken(map("access_token"), map("expires").toLong)
     }
   }
 
