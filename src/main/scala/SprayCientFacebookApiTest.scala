@@ -13,7 +13,7 @@ import spray.util._
 import spray.http._
 import HttpMethods._
 import HttpConduit._
-import com.pongr._
+import spracebook._
 implicit val system = ActorSystem()
 val ioBridge = IOExtension(system).ioBridge()
 val httpClient = system.actorOf(Props(new HttpClient(ioBridge)))
