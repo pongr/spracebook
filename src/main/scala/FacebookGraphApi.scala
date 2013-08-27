@@ -6,7 +6,9 @@ import FacebookGraphApiJsonProtocol._
 trait FacebookGraphApi {
   def debugToken(appAccessToken: String, userAccessToken: String): Future[TokenData]
 
-  def extendToken(appId: String, appSecret: String, accessToken: String): Future[TokenExtension]
+  def extendToken(appId: String, appSecret: String, accessToken: String): Future[AccessToken]
+
+  def getAccessToken(appId: String, appSecret: String, code: String, redirectUri: String): Future[AccessToken]
 
   def newPhotos(accessToken: String, after: Option[String]): Future[Response[Photo]]
 

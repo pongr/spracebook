@@ -31,12 +31,22 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
   }
 
   //This works now, via manual testing
-  def extendToken(appId: String, appSecret: String, accessToken: String): Future[TokenExtension] = {
-    val pipeline: HttpRequest => Future[TokenExtension] = (
+  def extendToken(appId: String, appSecret: String, accessToken: String): Future[AccessToken] = {
+    val pipeline: HttpRequest => Future[AccessToken] = (
       sendReceive(conduit)
-      ~> unmarshal[TokenExtension]
+      ~> unmarshal[AccessToken]
     )
     val url = "/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s" format (appId, appSecret, accessToken)
+    pipeline(Get(url))
+  }
+
+  def getAccessToken(appId: String, appSecret: String, code: String, redirectUri: String): Future[AccessToken] = {
+    //TODO this is basically the same as extendToken() request, just different query params, so extract some reusable function
+    val pipeline: HttpRequest => Future[AccessToken] = (
+      sendReceive(conduit)
+      ~> unmarshal[AccessToken]
+    )
+    val url = "/oauth/access_token?client_id=%s&client_secret=%s&code=%s&redirect_uri=%s" format (appId, appSecret, code, redirectUri)
     pipeline(Get(url))
   }
 
