@@ -4,6 +4,7 @@ import akka.dispatch.Future
 import FacebookGraphApiJsonProtocol._
 
 trait FacebookGraphApi {
+
   def debugToken(appAccessToken: String, userAccessToken: String): Future[TokenData]
 
   def extendToken(appId: String, appSecret: String, accessToken: String): Future[AccessToken]

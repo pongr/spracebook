@@ -110,6 +110,9 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     user_likes: Boolean
   )
 
+  case class Error(message: String, `type`: String, code: Int, error_subcode: Option[Int])
+  case class ErrorResponse(error: Error)
+
   implicit val tokenDataFormat = jsonFormat7(TokenData)
   implicit val tokenDataWrapperFormat = jsonFormat1(TokenDataWrapper)
   implicit val imageFormat = jsonFormat3(Image.apply)
@@ -126,4 +129,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   implicit val createdComment = jsonFormat1(CreatedComment)
   implicit val facebookFriends = jsonFormat1(FacebookFriends)
   implicit val commentFormat = jsonFormat7(Comment)
+
+  implicit val errorFormat = jsonFormat4(Error)
+  implicit val errorResponseFormat = jsonFormat1(ErrorResponse)
 }

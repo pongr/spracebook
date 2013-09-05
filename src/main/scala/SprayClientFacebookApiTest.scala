@@ -22,6 +22,9 @@ val conduit = system.actorOf(
   name = "http-conduit"
 )
 val fb = new SprayClientFacebookGraphApi(conduit)
+
+fb.getUser(token)
+
 val token = "TODO"
 
 fb.extendToken("TODO", "TODO", "TODO")
