@@ -21,6 +21,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     val pipeline: HttpRequest => Future[TokenDataWrapper] = (
       addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[TokenDataWrapper]
     )
     val url = "/debug_token?input_token=%s&access_token=%s" format (userAccessToken, appAccessToken)
@@ -44,6 +45,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     //TODO this is basically the same as extendToken() request, just different query params, so extract some reusable function
     val pipeline: HttpRequest => Future[AccessToken] = (
       sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[AccessToken]
     )
     val url = "/oauth/access_token?client_id=%s&client_secret=%s&code=%s&redirect_uri=%s" format (appId, appSecret, code, redirectUri)
@@ -56,6 +58,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[Response[Photo]]
     )
     //TODO should really get multiple recent photos, then check IDs for previous processing, dates for recency, etc
@@ -70,6 +73,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[User]
     )
     pipeline(Get("/me?fields=%s" format userFieldParams))
@@ -79,6 +83,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     val pipeline: HttpRequest => Future[Page] = (
       addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[Page]
     )
     pipeline(Get("/" + pageId))
@@ -89,6 +94,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + token)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[Response[Tab]]
     )
     pipeline(Get("/%s/tabs/%s" format (pageId, appId)))
@@ -100,6 +106,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[CreatedStory]
     )
     val data = List(
@@ -115,6 +122,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[CreatedComment]
     )
     pipeline(Post("/%s/comments" format photoId, FormData(Map("message" -> message))))
@@ -125,6 +133,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[FacebookFriends]
     )
     pipeline(Get("/me/friends?fields=%s" format userFieldParams)).map(_.data)
@@ -135,7 +144,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
-      ~> {s: HttpResponse => println("R : " + s); s}
+      ~> mapErrors
       ~> unmarshal[Response[Comment]]
     )
     pipeline(Get("/%s/comments" format objectId)).map(_.data)    
@@ -146,8 +155,27 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
       ~> sendReceive(conduit)
+      ~> mapErrors
       ~> unmarshal[Response[User]]
     )
     pipeline(Get("/%s/likes" format objectId)).map(_.data)      
   }
+
+  val mapErrors = (response: HttpResponse) => {
+    import Exceptions._
+    if (response.status.isSuccess) response else {
+      val error = response.entity.asString.asJson.convertTo[ErrorResponse].error
+
+      error.error_subcode match {
+        case Some(458) => throw AccessTokenException(error.message, AccessTokenErrorType.DeAuthorized)
+        case Some(459) => throw AccessTokenException(error.message, AccessTokenErrorType.LoggedOut)
+        case Some(460) => throw AccessTokenException(error.message, AccessTokenErrorType.PasswordChange)
+        case Some(463) => throw AccessTokenException(error.message, AccessTokenErrorType.Expired)
+        case Some(464) => throw AccessTokenException(error.message, AccessTokenErrorType.LoggedOut)
+        case Some(467) => throw AccessTokenException(error.message, AccessTokenErrorType.Invalid)
+        case _         => throw FacebookException(error.message) // TODO: extend to cover the most common exceptions
+      }
+    }
+  }
+
 }

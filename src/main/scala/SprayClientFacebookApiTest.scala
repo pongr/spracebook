@@ -22,6 +22,13 @@ val conduit = system.actorOf(
   name = "http-conduit"
 )
 val fb = new SprayClientFacebookGraphApi(conduit)
+
+// token expired due to password change
+val token="CAADomw3tT28BAFTbh3emeRbbmmLoikZChhl7tRG3M3NxrDLtE9V00dNWflEMQBS7C9sOpaH4K864bOQ9wnE2oGJADdm48GvxmZBmBX3svr8ITDp6twXbl36Lw7tMXB95mrM0z9kCZBFw1JnN5gKDUZC9XRmZBqZBZCTAKdaroRQ8jPrY263SuPE"
+val goodToken="CAADomw3tT28BAEk3ZC2LlbtN3FY45He07qqo08EtZBa9OullTTdkTgcIKjs7OX5sBD8dMHQUQYFZA4Y3ZCoCe2BolrbmQejMZBZCGzAlIGLP6WOtNrG54UThKOdB2xJVZCUGJKcNyAJabl0CemYY4h7fvfnjm03SYoEFNXZBpZAj246yxu8cbLMul"
+
+fb.getUser(token)
+
 val token = "TODO"
 
 fb.extendToken("TODO", "TODO", "TODO")
