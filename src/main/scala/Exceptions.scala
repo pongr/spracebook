@@ -2,12 +2,29 @@ package spracebook
 
 object Exceptions {
 
-  object AccessTokenErrorType extends Enumeration {
-    val Invalid, Expired, PasswordChange, DeAuthorized, LoggedOut = Value
+  object FacebookException {
+    def apply(msg: String, etype: String, errorCode: Int, errorSubcode: Option[Int]) = new FacebookException {
+      def message = msg
+      def exceptionType = etype
+      def code = errorCode
+      def subcode = errorSubcode
+    }
   }
 
-  case class FacebookException(message: String) extends RuntimeException(message)
+  trait FacebookException extends RuntimeException {
+    def message: String
+    def exceptionType: String
+    def code: Int
+    def subcode: Option[Int]
+  }
 
-  case class AccessTokenException(message: String, errorType: AccessTokenErrorType.Value) extends RuntimeException(message)
+  trait FacebookAccessTokenException extends FacebookException
+
+  case class AccessTokenExpiredException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
+  case class DeAuthorizedException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
+  case class PasswordChangedException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
+  case class NoSessionException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
+  case class InvalidAccessTokenException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
+
 
 }

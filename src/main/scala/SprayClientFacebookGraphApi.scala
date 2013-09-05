@@ -166,14 +166,17 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     if (response.status.isSuccess) response else {
       val error = response.entity.asString.asJson.convertTo[ErrorResponse].error
 
+      // https://developers.facebook.com/docs/reference/api/errors/
       error.error_subcode match {
-        case Some(458) => throw AccessTokenException(error.message, AccessTokenErrorType.DeAuthorized)
-        case Some(459) => throw AccessTokenException(error.message, AccessTokenErrorType.LoggedOut)
-        case Some(460) => throw AccessTokenException(error.message, AccessTokenErrorType.PasswordChange)
-        case Some(463) => throw AccessTokenException(error.message, AccessTokenErrorType.Expired)
-        case Some(464) => throw AccessTokenException(error.message, AccessTokenErrorType.LoggedOut)
-        case Some(467) => throw AccessTokenException(error.message, AccessTokenErrorType.Invalid)
-        case _         => throw FacebookException(error.message) // TODO: extend to cover the most common exceptions
+        case Some(458) => throw DeAuthorizedException(error.message, error.`type`, error.code, error.error_subcode)
+        case Some(459) => throw NoSessionException(error.message, error.`type`, error.code, error.error_subcode)
+        case Some(460) => throw PasswordChangedException(error.message, error.`type`, error.code, error.error_subcode)
+        case Some(463) => throw AccessTokenExpiredException(error.message, error.`type`, error.code, error.error_subcode)
+        case Some(464) => throw NoSessionException(error.message, error.`type`, error.code, error.error_subcode)
+        case Some(467) => throw InvalidAccessTokenException(error.message, error.`type`, error.code, error.error_subcode)
+
+        // TODO: extend to cover the most common exceptions
+        case _         => throw FacebookException(error.message, error.`type`, error.code, error.error_subcode)
       }
     }
   }
