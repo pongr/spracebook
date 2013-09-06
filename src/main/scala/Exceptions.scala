@@ -16,6 +16,13 @@ object Exceptions {
     def exceptionType: String
     def code: Int
     def subcode: Option[Int]
+
+    override def toString = {
+      this.getClass.getName + "(" +
+      "message: " + message + ", " +
+      "exceptionType: " + exceptionType + ", " +
+      "code: " + code + ", subcode: " + subcode + ")"
+    }
   }
 
   trait FacebookAccessTokenException extends FacebookException
