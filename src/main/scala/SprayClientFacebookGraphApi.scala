@@ -164,19 +164,20 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
   val mapErrors = (response: HttpResponse) => {
     import Exceptions._
     if (response.status.isSuccess) response else {
-      val error = response.entity.asString.asJson.convertTo[ErrorResponse].error
 
       // https://developers.facebook.com/docs/reference/api/errors/
-      error.error_subcode match {
-        case Some(458) => throw DeAuthorizedException(error.message, error.`type`, error.code, error.error_subcode)
-        case Some(459) => throw NoSessionException(error.message, error.`type`, error.code, error.error_subcode)
-        case Some(460) => throw PasswordChangedException(error.message, error.`type`, error.code, error.error_subcode)
-        case Some(463) => throw AccessTokenExpiredException(error.message, error.`type`, error.code, error.error_subcode)
-        case Some(464) => throw NoSessionException(error.message, error.`type`, error.code, error.error_subcode)
-        case Some(467) => throw InvalidAccessTokenException(error.message, error.`type`, error.code, error.error_subcode)
+      response.entity.asString.asJson.convertTo[ErrorResponse].error match {
+        case e if e.error_subcode == Some(458) => throw DeAuthorizedException(e.message, e.`type`, e.code, e.error_subcode)
+        case e if e.error_subcode == Some(459) => throw NoSessionException(e.message, e.`type`, e.code, e.error_subcode)
+        case e if e.error_subcode == Some(460) => throw PasswordChangedException(e.message, e.`type`, e.code, e.error_subcode)
+        case e if e.error_subcode == Some(463) => throw AccessTokenExpiredException(e.message, e.`type`, e.code, e.error_subcode)
+        case e if e.error_subcode == Some(464) => throw NoSessionException(e.message, e.`type`, e.code, e.error_subcode)
+        case e if e.error_subcode == Some(467) => throw InvalidAccessTokenException(e.message, e.`type`, e.code, e.error_subcode)
+
+        case e if e.code == 10 || e.code > 199 && e.code < 300 => throw new FacebookPermissionException(e.message, e.`type`, e.code, e.error_subcode)
 
         // TODO: extend to cover the most common exceptions
-        case _         => throw FacebookException(error.message, error.`type`, error.code, error.error_subcode)
+        case e         => throw FacebookException(e.message, e.`type`, e.code, e.error_subcode)
       }
     }
   }
