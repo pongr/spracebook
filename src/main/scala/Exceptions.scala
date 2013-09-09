@@ -34,4 +34,5 @@ object Exceptions {
   case class InvalidAccessTokenException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookAccessTokenException
 
 
+  case class FacebookPermissionException(message: String, exceptionType: String, code: Int, subcode: Option[Int]) extends FacebookException
 }
