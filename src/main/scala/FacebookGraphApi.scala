@@ -28,4 +28,13 @@ trait FacebookGraphApi {
   def getComments(objectId: String, accessToken: String): Future[Seq[Comment]]
 
   def getLikes(objectId: String, accessToken: String): Future[Seq[User]]
+
+  def getSharedPosts(objectId: String, accessToken: String): Future[Seq[Share]]
+
+  //Facebook Insights
+  def getApplicationOpenGraphActionCreate(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]]
+
+  def getApplicationOpenGraphActionClick(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]]
+  
+  def getApplicationOpenGraphActionImpressions(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]]  
 }
