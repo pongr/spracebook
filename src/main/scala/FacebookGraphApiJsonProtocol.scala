@@ -110,6 +110,49 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     user_likes: Boolean
   )
 
+  case class Properties(
+    name: String,
+    text: String,
+    href: String
+  )
+
+  case class Share(
+    id: String,
+    from: User,
+    message: String,
+    story: String,
+    picture: String,
+    link: String,
+    name: String, //album name
+    caption: String,
+    properties: Seq[Properties],
+    status_type: String,
+    object_id: String,
+    created_time: String
+  )
+
+  case class Insight(
+    id: String,
+    name: String,
+    period: String,
+    values: Seq[InsightDataPoint],
+    title: String,
+    description: String
+  )
+
+  case class InsightValue(
+    action_type_id: Long,
+    action_type_name: String,
+    object_type_id: Long,
+    object_type_name: String,
+    value: Int
+  )
+
+  case class InsightDataPoint(
+    value: Seq[InsightValue],
+    end_time: String
+  )
+
   case class Error(message: String, `type`: String, code: Int, error_subcode: Option[Int])
   case class ErrorResponse(error: Error)
 
@@ -129,6 +172,12 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   implicit val createdComment = jsonFormat1(CreatedComment)
   implicit val facebookFriends = jsonFormat1(FacebookFriends)
   implicit val commentFormat = jsonFormat7(Comment)
+  implicit val propertiesFormat = jsonFormat3(Properties)
+  implicit val shareFormat = jsonFormat12(Share)
+  
+  implicit val insightValueFormat = jsonFormat5(InsightValue)
+  implicit val insightDataPointFormat = jsonFormat2(InsightDataPoint)
+  implicit val insightFormat = jsonFormat6(Insight)
 
   implicit val errorFormat = jsonFormat4(Error)
   implicit val errorResponseFormat = jsonFormat1(ErrorResponse)

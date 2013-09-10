@@ -161,6 +161,51 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     pipeline(Get("/%s/likes" format objectId)).map(_.data)      
   }
 
+  def getSharedPosts(objectId: String, accessToken: String): Future[Seq[Share]] = {
+    val pipeline: HttpRequest => Future[Response[Share]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Share]]
+    )
+    pipeline(Get("/%s/sharedposts" format objectId)).map(_.data)     
+  }
+
+  //Insight stuff
+  def getApplicationOpenGraphActionCreate(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]] = {
+    val pipeline: HttpRequest => Future[Response[Insight]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Insight]]
+    )
+    pipeline(Get("/%s/insights/application_opengraph_action_create?since=%s&until=%s" format (appId, since, until))).map(_.data)     
+  }
+
+  def getApplicationOpenGraphActionClick(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]] = {
+    val pipeline: HttpRequest => Future[Response[Insight]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Insight]]
+    )
+    pipeline(Get("/%s/insights/application_opengraph_story_click?since=%s&until=%s" format (appId, since, until))).map(_.data)     
+  }
+
+  def getApplicationOpenGraphActionImpressions(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]] = {
+    val pipeline: HttpRequest => Future[Response[Insight]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Insight]]
+    )
+    pipeline(Get("/%s/insights/application_opengraph_story_impressions?since=%s&until=%s" format (appId, since, until))).map(_.data)     
+  }
+
   val mapErrors = (response: HttpResponse) => {
     import Exceptions._
     if (response.status.isSuccess) response else {
