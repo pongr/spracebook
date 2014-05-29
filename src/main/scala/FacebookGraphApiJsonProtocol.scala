@@ -72,8 +72,8 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     email: Option[String],
     link: Option[String],
     gender: Option[String],
-    picture: Option[UserProfilePicContainer]
-{
+    picture: Option[UserProfilePicContainer]){
+    
     // Ignores Facebook default photo
     def profilePic: Option[String] = picture.flatMap(p => if (p.data.is_silhouette) None else Some(p.data.url))
   }
