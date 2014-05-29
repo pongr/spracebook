@@ -36,5 +36,9 @@ trait FacebookGraphApi {
 
   def getApplicationOpenGraphActionClick(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]]
   
-  def getApplicationOpenGraphActionImpressions(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]]  
+  def getApplicationOpenGraphActionImpressions(appId: String, accessToken: String, since: Long, until: Long): Future[Seq[Insight]] 
+
+
+  //Get events
+  def getEvents(accessToken: String, since: Option[String] = None, until: Option[String] = None): Future[Seq[Event]]
 }

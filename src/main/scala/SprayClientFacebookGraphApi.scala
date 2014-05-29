@@ -13,6 +13,9 @@ import FacebookGraphApiJsonProtocol._
 import akka.util.Timeout
 import scala.concurrent.duration._
 
+import org.joda.time.DateTime
+import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
+
 class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi with LazyLogging { 
 
   
@@ -213,6 +216,28 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     )
     pipeline(Get("/%s/insights/application_opengraph_story_impressions?since=%s&until=%s" format (appId, since, until))).map(_.data)     
   }
+
+
+
+  private val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+
+  def getEvents(accessToken: String, since: Option[String] = None, until: Option[String] = None): Future[Seq[Event]] = {
+    val pipeline: HttpRequest => Future[Response[Event]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Event]]
+    )
+
+    //since and for 1 week
+    val now = new DateTime()
+    val sinceDate = since.getOrElse(dateFormatter.print(now.minusWeeks(1)))
+    val untilDate = until.getOrElse(dateFormatter.print(now.plusWeeks(1)))
+
+    pipeline(Get("/me/events?since=%s&until=%s&fields=id,cover,description,start_time,end_time,location,ticket_uri,name,timezone".format(sinceDate, untilDate))).map(_.data)
+  }
+
 
   val mapErrors = (response: HttpResponse) => {
     import Exceptions._

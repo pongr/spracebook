@@ -27,9 +27,11 @@ object SprayCientFacebookApiTest {
     for {
       Http.HostConnectorInfo(connector, _) <- IO(Http) ? Http.HostConnectorSetup("graph.facebook.com", 443, true)
       val api = new SprayClientFacebookGraphApi(connector)
-      likes <- api.getLikes("487217224648173", "put_token_here")
+      friends <- api.getFriends(token)
+      events <- api.getEvents(token)
     } yield {
-      println("Result: " + likes)
+      println("Result: " + friends)
+      println("Result: " + events)
       system.shutdown
     }
   }

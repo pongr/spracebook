@@ -16,6 +16,8 @@ libraryDependencies ++= {
     "io.spray" % "spray-json_2.10" % "1.2.6",
     "com.typesafe.akka" % "akka-actor_2.10" % akka,
     "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
-    "org.specs2" %% "specs2" % "2.3.12" % "test"
+    "org.specs2" %% "specs2" % "2.3.12" % "test",
+    "joda-time" % "joda-time" % "2.3",
+    "org.joda" % "joda-convert" % "1.6"
   )
 }
