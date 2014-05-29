@@ -73,7 +73,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     link: Option[String],
     gender: Option[String],
     picture: Option[UserProfilePicContainer]){
-    
+
     // Ignores Facebook default photo
     def profilePic: Option[String] = picture.flatMap(p => if (p.data.is_silhouette) None else Some(p.data.url))
   }
@@ -148,6 +148,10 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     offset_y: Option[Int],
     offset_x: Option[Int])
 
+  case class EventOwner(
+    name: String,
+    id: String)
+
   case class Event(
     id: String,
     cover: Option[EventCoverPhoto],
@@ -157,7 +161,8 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     location: Option[String],
     ticket_uri: Option[String],
     name: String,
-    timezone: Option[String])
+    timezone: Option[String],
+    owner: EventOwner)
 
 
   case class Error(message: String, `type`: String, code: Int, error_subcode: Option[Int])
@@ -190,6 +195,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   implicit val errorResponseFormat = jsonFormat1(ErrorResponse)
 
   implicit val eventCoverPhotoFormat = jsonFormat4(EventCoverPhoto)
-  implicit val eventFormat = jsonFormat9(Event)
+  implicit val eventOwnerFormat = jsonFormat2(EventOwner)
+  implicit val eventFormat = jsonFormat10(Event)
 
 }
