@@ -16,21 +16,19 @@ import HttpMethods._
 
 object SprayCientFacebookApiTest {
 
-  implicit val system = ActorSystem()
-  implicit val timeout = Timeout(30 seconds)
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
-
-  val token = "TODO"
-
   def main(args: Array[String]) {
+
+    implicit val system = ActorSystem()
+    implicit val timeout = Timeout(30 seconds)
+    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+
+    val token = "TODO"
 
     for {
       Http.HostConnectorInfo(connector, _) <- IO(Http) ? Http.HostConnectorSetup("graph.facebook.com", 443, true)
       val api = new SprayClientFacebookGraphApi(connector)
-      //friends <- api.getFriends(token)
       events <- api.getEvents(token)
     } yield {
-      //println("Result: " + friends)
       println("Result: " + events)
       system.shutdown
     }
