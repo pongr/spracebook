@@ -16,10 +16,10 @@ import scala.concurrent.duration._
 import org.joda.time.DateTime
 import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
 
-class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi with LazyLogging { 
+class SprayClientFacebookGraphApi(conduit: ActorRef)(implicit timeout: Timeout) extends FacebookGraphApi with LazyLogging { 
 
-  
-  implicit val timeout = Timeout(10 seconds)
+
+  //Grab execution context
   implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -222,6 +222,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
   private val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
 
   def getEvents(accessToken: String, since: Option[String] = None, until: Option[String] = None): Future[Seq[Event]] = {
+    
     val pipeline: HttpRequest => Future[Response[Event]] = (
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
@@ -232,8 +233,8 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
 
     //since and for 1 week
     val now = new DateTime()
-    val sinceDate = since.getOrElse(dateFormatter.print(now.minusWeeks(1)))
-    val untilDate = until.getOrElse(dateFormatter.print(now.plusWeeks(1)))
+    val sinceDate = since.getOrElse(dateFormatter.print(now.minusDays(7)))
+    val untilDate = until.getOrElse(dateFormatter.print(now.plusDays(7)))
 
     pipeline(Get("/me/events?since=%s&until=%s&fields=id,cover,description,start_time,end_time,location,ticket_uri,name,timezone".format(sinceDate, untilDate))).map(_.data)
   }

@@ -153,23 +153,25 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     end_time: String
   )
 
-  case class CoverPhoto(
-    id: String,
-    source: String,
-    offset_y: Int,
-    offset_x: Int)
+
+
+
+  case class EventCoverPhoto(
+    cover_id: Option[String],
+    source: Option[String],
+    offset_y: Option[Int],
+    offset_x: Option[Int])
 
   case class Event(
     id: String,
-    cover: CoverPhoto,
-    description: String,
+    cover: Option[EventCoverPhoto],
+    description: Option[String],
     start_time: String,
-    end_time: String,
-    location: String,
-    ticket_uri: String,
+    end_time: Option[String],
+    location: Option[String],
+    ticket_uri: Option[String],
     name: String,
-    timezone: String)
-
+    timezone: Option[String])
 
 
   case class Error(message: String, `type`: String, code: Int, error_subcode: Option[Int])
@@ -201,7 +203,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   implicit val errorFormat = jsonFormat4(Error)
   implicit val errorResponseFormat = jsonFormat1(ErrorResponse)
 
-  implicit val coverPhotoFormat = jsonFormat4(CoverPhoto)
+  implicit val eventCoverPhotoFormat = jsonFormat4(EventCoverPhoto)
   implicit val eventFormat = jsonFormat9(Event)
 
 }
