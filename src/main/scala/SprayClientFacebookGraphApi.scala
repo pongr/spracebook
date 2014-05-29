@@ -1,18 +1,24 @@
 package spracebook
 
-import akka.dispatch.Future
+import scala.concurrent.Future
 import akka.actor.ActorRef
-import spray.client.HttpConduit
-import HttpConduit._
+import spray.client.pipelining._
 import spray.http._
 import HttpMethods._
 import spray.json._
 import DefaultJsonProtocol._
 import spray.httpx.SprayJsonSupport._
-import grizzled.slf4j.Logging
-import FacebookGraphApiJsonProtocol._
+import com.typesafe.scalalogging.slf4j.LazyLogging
+import FacebookGraphApiJsonProtocol._ 
+import akka.util.Timeout
+import scala.concurrent.duration._
 
-class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi with Logging {
+class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi with LazyLogging { 
+
+  
+  implicit val timeout = Timeout(10 seconds)
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+
 
   val userFieldParams = "id,username,name,first_name,middle_name,last_name,email,link,gender,picture"
   
@@ -24,7 +30,9 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       ~> mapErrors
       ~> unmarshal[TokenDataWrapper]
     )
+
     val url = "/debug_token?input_token=%s&access_token=%s" format (userAccessToken, appAccessToken)
+    
     pipeline(Get(url)).map(_.data)
     /*val f = pipeline(Get(url))
     f.onComplete(e => println(e))
@@ -188,7 +196,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     val pipeline: HttpRequest => Future[Response[Insight]] = (
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
-      ~> sendReceive(conduit)
+       ~>sendReceive(conduit)
       ~> mapErrors
       ~> unmarshal[Response[Insight]]
     )

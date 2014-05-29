@@ -1,7 +1,13 @@
-resolvers += Resolver.url("sbt-plugin-releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
+sbtVersion := "0.13.2"
 
-addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")
+scalaVersion := "2.10.3"
 
-resolvers += "gseitz@github" at "http://gseitz.github.com/maven/"
+resolvers += Resolver.url("artifactory", url("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.4")
+resolvers += "sbt-taglist-releases" at "http://johanandren.github.com/releases/"
+
+resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
+
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.4.0")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")

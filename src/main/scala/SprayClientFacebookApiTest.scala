@@ -1,77 +1,37 @@
 package spracebook
 
-/* REPL commands for manual testing:
-import akka.dispatch.Future
+import scala.concurrent.Future
 import akka.actor._
-import akka.dispatch.Await
-import akka.util.duration._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import akka.util.Timeout
-import spray.can.client.HttpClient
-import spray.client.HttpConduit
+import akka.io.IO
+import spray.client.pipelining._
 import spray.io._
 import spray.util._
 import spray.http._
+import spray.can.Http
+import akka.pattern.ask
 import HttpMethods._
-import HttpConduit._
-import spracebook._
-implicit val system = ActorSystem()
-val ioBridge = IOExtension(system).ioBridge()
-val httpClient = system.actorOf(Props(new HttpClient(ioBridge)))
-val conduit = system.actorOf(
-  props = Props(new HttpConduit(httpClient, "graph.facebook.com", 443, sslEnabled = true)),
-  name = "http-conduit"
-)
-val fb = new SprayClientFacebookGraphApi(conduit)
-
-fb.getUser(token)
-
-val token = "TODO"
-
-fb.extendToken("TODO", "TODO", "TODO")
-
-fb.debugToken("TODO", "TODO")
-
-fb.newPhotos(token, None)
-
-Await.result(fb.getFriends(token), 1 minutes)
-
-fb.createStory("cuppofjoe:photograph", "cup", "380730112032825", "https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-frc1/481514_10151657606201011_1061656805_n.jpg", "TODO")
-
-fb.createComment("4286226694008", "Check it out! http://cuppofjoe.com", token)
-
-*/
-
-import akka.dispatch.Future
-import akka.actor._
-import akka.dispatch.Await
-import akka.util.duration._
-import akka.util.Timeout
-import spray.can.client.HttpClient
-import spray.client.HttpConduit
-import spray.io._
-import spray.util._
-import spray.http._
-import HttpMethods._
-import HttpConduit._
 
 object SprayCientFacebookApiTest {
-  implicit val system = ActorSystem()
-  val ioBridge = IOExtension(system).ioBridge()
-  val httpClient = system.actorOf(Props(new HttpClient(ioBridge)))
 
-  val facebookApiConduit = system.actorOf(
-    props = Props(new HttpConduit(httpClient, "graph.facebook.com", 443, sslEnabled = true)),
-    name = "facebook-api-conduit"
-  )
-  
+  implicit val system = ActorSystem()
+  implicit val timeout = Timeout(10 seconds)
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+
   val token = "TODO"
 
-  val fbApi = new SprayClientFacebookGraphApi(facebookApiConduit)
-
   def main(args: Array[String]) {
-    val users = Await.result(fbApi.getLikes("487217224648173", token), 1 minutes)
-    println("Result : " + users)
-    system.shutdown
+
+    for {
+      Http.HostConnectorInfo(connector, _) <- IO(Http) ? Http.HostConnectorSetup("graph.facebook.com", 443, true)
+      val api = new SprayClientFacebookGraphApi(connector)
+      likes <- api.getLikes("487217224648173", "put_token_here")
+    } yield {
+      println("Result: " + likes)
+      system.shutdown
+    }
   }
 
 }
