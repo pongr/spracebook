@@ -1,6 +1,7 @@
 package spracebook
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
 import spray.client.pipelining._
 import spray.http._
@@ -16,11 +17,7 @@ import scala.concurrent.duration._
 import org.joda.time.DateTime
 import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
 
-class SprayClientFacebookGraphApi(conduit: ActorRef)(implicit timeout: Timeout) extends FacebookGraphApi with LazyLogging { 
-
-
-  //Grab execution context
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+class SprayClientFacebookGraphApi(conduit: ActorRef)(implicit timeout: Timeout, ec: ExecutionContext) extends FacebookGraphApi with LazyLogging { 
 
 
   val userFieldParams = "id,username,name,first_name,middle_name,last_name,email,link,gender,picture"

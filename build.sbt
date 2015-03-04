@@ -2,22 +2,23 @@ organization := "com.pongr"
 
 name := "spracebook"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.5"
 
 resolvers ++= Seq(
-  "Spray" at "http://repo.spray.io/"
+  "Spray" at "http://repo.spray.io/",
+  "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
+
 )
 
 libraryDependencies ++= {
-  val spray = "1.3.1"
-  val akka = "2.3.3"
+  val spray = "1.3.2"
+  val akka = "2.3.9"
   Seq(
-    "io.spray" % "spray-client" % spray,
-    "io.spray" % "spray-json_2.10" % "1.2.6",
-    "com.typesafe.akka" % "akka-actor_2.10" % akka,
+    "io.spray" % "spray-client_2.11" % spray,
+    "io.spray" % "spray-json_2.11" % "1.3.1",
+    "com.typesafe.akka" % "akka-actor_2.11" % akka,
     "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
-    "org.specs2" %% "specs2" % "2.3.12" % "test",
-    "joda-time" % "joda-time" % "2.3",
-    "org.joda" % "joda-convert" % "1.6"
+    "joda-time" % "joda-time" % "2.7",
+    "org.joda" % "joda-convert" % "1.7"
   )
 }
