@@ -20,7 +20,7 @@ import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
 class SprayClientFacebookGraphApi(conduit: ActorRef)(implicit timeout: Timeout, ec: ExecutionContext) extends FacebookGraphApi with LazyLogging { 
 
 
-  val userFieldParams = "id,username,name,first_name,middle_name,last_name,email,link,gender,picture"
+  val userFieldParams = "id,name,first_name,middle_name,last_name,email,link,gender,picture"
   
   //This works now, via manual testing
   def debugToken(appAccessToken: String, userAccessToken: String): Future[TokenData] = {
