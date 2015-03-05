@@ -11,15 +11,13 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     user_id: Long, 
     issued_at: Option[Long], 
     expires_at: Long, 
-    scopes: Seq[String]
-  )
+    scopes: Seq[String])
 
   case class TokenDataWrapper(data: TokenData)
 
   case class AccessToken(
     access_token: String, 
-    expires: Long
-  )
+    expires: Long)
 
   object AccessToken {
     //for unmarshalling response from Graph API: String => AccessToken
@@ -35,8 +33,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   case class Image(
     width: Int,
     height: Int,
-    source: String
-  )
+    source: String)
 
   object Image {
     implicit val ordering: Ordering[Image] = new Ordering[Image] {
@@ -47,24 +44,20 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   case class Photo(
     id: String,
     name: Option[String], //this is the photo caption
-    images: Seq[Image]
-  )
+    images: Seq[Image])
 
   case class Cursors(
     after: String,
-    before: String
-  )
+    before: String)
 
   case class Paging(
     cursors: Option[Cursors],
     next: Option[String],
-    previous: Option[String]
-  )
+    previous: Option[String])
 
   case class Response[T](
     data: Seq[T],
-    paging: Option[Paging]
-  )
+    paging: Option[Paging])
 
   case class UserProfilePic (url: String, is_silhouette: Boolean)
   case class UserProfilePicContainer (data: UserProfilePic)
@@ -79,8 +72,8 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     email: Option[String],
     link: Option[String],
     gender: Option[String],
-    picture: Option[UserProfilePicContainer]
-  ) {
+    picture: Option[UserProfilePicContainer]){
+
     // Ignores Facebook default photo
     def profilePic: Option[String] = picture.flatMap(p => if (p.data.is_silhouette) None else Some(p.data.url))
   }
@@ -94,8 +87,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
   //{"id":"100914593450999","photos":["100914610117664"]}
   case class CreatedStory(
     id: String,
-    photos: Seq[String]
-  )
+    photos: Seq[String])
 
   //{"id":"4286226694008_1953664"}
   case class CreatedComment(id: String)
@@ -107,14 +99,12 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     can_remove: Boolean,
     created_time: String,
     like_count: Int,
-    user_likes: Boolean
-  )
+    user_likes: Boolean)
 
   case class Properties(
     name: String,
     text: String,
-    href: String
-  )
+    href: String)
 
   case class Share(
     id: String,
@@ -128,8 +118,7 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     properties: Seq[Properties],
     status_type: String,
     object_id: String,
-    created_time: String
-  )
+    created_time: String)
 
   case class Insight(
     id: String,
@@ -137,21 +126,44 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
     period: String,
     values: Seq[InsightDataPoint],
     title: String,
-    description: String
-  )
+    description: String)
 
   case class InsightValue(
     action_type_id: Long,
     action_type_name: String,
     object_type_id: Long,
     object_type_name: String,
-    value: Int
-  )
+    value: Int)
 
   case class InsightDataPoint(
     value: Seq[InsightValue],
-    end_time: String
-  )
+    end_time: String)
+
+
+
+
+  case class EventCoverPhoto(
+    cover_id: Option[String],
+    source: Option[String],
+    offset_y: Option[Int],
+    offset_x: Option[Int])
+
+  case class EventOwner(
+    name: String,
+    id: String)
+
+  case class Event(
+    id: String,
+    cover: Option[EventCoverPhoto],
+    description: Option[String],
+    start_time: String,
+    end_time: Option[String],
+    location: Option[String],
+    ticket_uri: Option[String],
+    name: String,
+    timezone: Option[String],
+    owner: EventOwner)
+
 
   case class Error(message: String, `type`: String, code: Int, error_subcode: Option[Int])
   case class ErrorResponse(error: Error)
@@ -181,4 +193,9 @@ object FacebookGraphApiJsonProtocol extends DefaultJsonProtocol {
 
   implicit val errorFormat = jsonFormat4(Error)
   implicit val errorResponseFormat = jsonFormat1(ErrorResponse)
+
+  implicit val eventCoverPhotoFormat = jsonFormat4(EventCoverPhoto)
+  implicit val eventOwnerFormat = jsonFormat2(EventOwner)
+  implicit val eventFormat = jsonFormat10(Event)
+
 }

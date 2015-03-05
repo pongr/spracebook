@@ -17,19 +17,20 @@ The Facebook Graph API is represented as a trait; each action that can be perfor
 ``` scala
 //setup
 implicit val system = ActorSystem()
-val ioBridge = IOExtension(system).ioBridge()
-val httpClient = system.actorOf(Props(new HttpClient(ioBridge)))
-val facebookApiConduit = system.actorOf(
-  props = Props(new HttpConduit(httpClient, "graph.facebook.com", 443, sslEnabled = true)),
-  name = "facebook-api-conduit"
-)
-val facebook = new SprayClientFacebookGraphApi(facebookApiConduit)
+implicit val timeout = Timeout(10 seconds)
+implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+
+val facebook = Future[SprayClientFacebookGraphApi] = for {
+  Http.HostConnectorInfo(connector, _) <- IO(Http) ? Http.HostConnectorSetup("graph.facebook.com", 443, true)
+} yield {
+  new SprayClientFacebookGraphApi(connector)
+}
 
 //examples
 val token: String = ???
-val user: Future[User] = facebook.getUser(token)
-val friends: Future[Seq[User]] = facebook.getFriends(token)
-val event: Future[CreatedComment] = facebook.createComment(photoId, "That is totally rad!", token)
+val user: Future[User] = facebook.flatMap(_.getUser(token))
+val friends: Future[Seq[User]] = facebook.flatMap(_.getFriends(token))
+val event: Future[CreatedComment] = facebook.flatMap(_.createComment(photoId, "That is totally rad!", token))
 ```
 
 ### License

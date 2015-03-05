@@ -1,20 +1,26 @@
 package spracebook
 
-import akka.dispatch.Future
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
-import spray.client.HttpConduit
-import HttpConduit._
+import spray.client.pipelining._
 import spray.http._
 import HttpMethods._
 import spray.json._
 import DefaultJsonProtocol._
 import spray.httpx.SprayJsonSupport._
-import grizzled.slf4j.Logging
-import FacebookGraphApiJsonProtocol._
+import com.typesafe.scalalogging.slf4j.LazyLogging
+import FacebookGraphApiJsonProtocol._ 
+import akka.util.Timeout
+import scala.concurrent.duration._
 
-class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi with Logging {
+import org.joda.time.DateTime
+import org.joda.time.format.{ DateTimeFormat, ISODateTimeFormat }
 
-  val userFieldParams = "id,username,name,first_name,middle_name,last_name,email,link,gender,picture"
+class SprayClientFacebookGraphApi(conduit: ActorRef)(implicit timeout: Timeout, ec: ExecutionContext) extends FacebookGraphApi with LazyLogging { 
+
+
+  val userFieldParams = "id,name,first_name,middle_name,last_name,email,link,gender,picture"
   
   //This works now, via manual testing
   def debugToken(appAccessToken: String, userAccessToken: String): Future[TokenData] = {
@@ -24,7 +30,9 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
       ~> mapErrors
       ~> unmarshal[TokenDataWrapper]
     )
+
     val url = "/debug_token?input_token=%s&access_token=%s" format (userAccessToken, appAccessToken)
+    
     pipeline(Get(url)).map(_.data)
     /*val f = pipeline(Get(url))
     f.onComplete(e => println(e))
@@ -188,7 +196,7 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     val pipeline: HttpRequest => Future[Response[Insight]] = (
       addHeader("Authorization", "Bearer " + accessToken)
       ~> addHeader("Accept", "application/json")
-      ~> sendReceive(conduit)
+       ~>sendReceive(conduit)
       ~> mapErrors
       ~> unmarshal[Response[Insight]]
     )
@@ -205,6 +213,29 @@ class SprayClientFacebookGraphApi(conduit: ActorRef) extends FacebookGraphApi wi
     )
     pipeline(Get("/%s/insights/application_opengraph_story_impressions?since=%s&until=%s" format (appId, since, until))).map(_.data)     
   }
+
+
+
+  private val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+
+  def getEvents(accessToken: String, since: Option[String] = None, until: Option[String] = None): Future[Seq[Event]] = {
+    
+    val pipeline: HttpRequest => Future[Response[Event]] = (
+      addHeader("Authorization", "Bearer " + accessToken)
+      ~> addHeader("Accept", "application/json")
+      ~> sendReceive(conduit)
+      ~> mapErrors
+      ~> unmarshal[Response[Event]]
+    )
+
+    //since and for 1 week
+    val now = new DateTime()
+    val sinceDate = since.getOrElse(dateFormatter.print(now.minusDays(7)))
+    val untilDate = until.getOrElse(dateFormatter.print(now.plusDays(7)))
+
+    pipeline(Get("/me/events?since=%s&until=%s&fields=id,cover,description,start_time,end_time,location,ticket_uri,name,timezone".format(sinceDate, untilDate))).map(_.data)
+  }
+
 
   val mapErrors = (response: HttpResponse) => {
     import Exceptions._
